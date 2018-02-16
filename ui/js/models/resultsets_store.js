@@ -352,6 +352,7 @@ treeherder.factory('ThResultSetStore', [
             const push = repositories[repoName].rsMap[pushId];
             push.selected_runnable_jobs = [];
             push.rs_obj.isRunnableVisible = false;
+            $rootScope.$emit(thEvents.selectRunnableJob, []);
             $rootScope.$emit(thEvents.globalFilterChanged);
         };
 
@@ -946,6 +947,7 @@ treeherder.factory('ThResultSetStore', [
             } else {
                 selectedRunnableJobs.splice(jobIndex, 1);
             }
+            $rootScope.$emit(thEvents.selectRunnableJob, selectedRunnableJobs, resultsetId);
             return selectedRunnableJobs;
         };
 

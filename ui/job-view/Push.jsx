@@ -12,6 +12,7 @@ export default class Push extends React.Component {
 
     this.$rootScope = $injector.get('$rootScope');
     this.thEvents = $injector.get('thEvents');
+    this.ThResultSetStore = $injector.get('ThResultSetStore');
 
     this.aggregateId = aggregateIds.getPushTableId(
       repoName, push.id, push.revision
@@ -30,6 +31,7 @@ export default class Push extends React.Component {
   }
 
   hideRunnableJobs() {
+    this.ThResultSetStore.deleteRunnableJobs(this.props.repoName, this.props.push.id);
     this.$rootScope.$emit(this.thEvents.deleteRunnableJobs, this.props.push.id);
     this.setState({ runnableVisible: false });
   }

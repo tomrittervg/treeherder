@@ -142,8 +142,9 @@ treeherder.provider('thEvents', function () {
 
             autoclassifyToggleExpandOptions: "ac-toggle-expand-options-EVT",
 
-            autoclassifyToggleEdit: "ac-toggle-edit-EVT"
+            autoclassifyToggleEdit: "ac-toggle-edit-EVT",
 
+            selectRunnableJob: "select-runnable-job-EVT",
         };
     };
 });

@@ -49,6 +49,7 @@ export default class PushHeader extends React.PureComponent {
     this.ThResultSetStore = $injector.get('ThResultSetStore');
     this.ThResultSetModel = $injector.get('ThResultSetModel');
     this.ThModelErrors = $injector.get('ThModelErrors');
+    this.ThTaskclusterErrors = $injector.get('ThTaskclusterErrors');
 
     const dateFormat = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
     this.pushDateStr = new Date(pushTimestamp*1000).toLocaleString("en-US", dateFormat);
@@ -61,17 +62,27 @@ export default class PushHeader extends React.PureComponent {
 
     this.state = {
       showConfirmCancelAll: false,
+      runnableJobsSelected: false,
     };
+  }
+
+  componentWillMount() {
+    this.toggleRunnableJobUnlisten = this.$rootScope.$on(
+      this.thEvents.selectRunnableJob, (ev, runnableJobs, pushId) => {
+        if (this.props.pushId === pushId) {
+          this.setState({ runnableJobsSelected: runnableJobs.length > 0 });
+        }
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    this.toggleRunnableJobUnlisten();
   }
 
   filterParams() {
     return Object.entries(this.thJobFilters.getActiveFilters())
       .reduce((acc, [key, value]) => `&${key}=${value}`, "");
-  }
-
-  showTriggerButton() {
-    const buildernames = this.ThResultSetStore.getSelectedRunnableJobs(this.props.repoName, this.props.pushId);
-    return buildernames.length > 0;
   }
 
   triggerNewJobs() {
@@ -83,11 +94,11 @@ export default class PushHeader extends React.PureComponent {
     }
     if (loggedIn) {
       const builderNames = this.ThResultSetStore.getSelectedRunnableJobs(repoName, pushId);
-      this.ThResultSetStore.getGeckoDecisionTaskId(repoName, pushId).then(function (decisionTaskID) {
-        this.ThResultSetModel.triggerNewJobs(builderNames, decisionTaskID).then(function (result) {
+      this.ThResultSetStore.getGeckoDecisionTaskId(repoName, pushId).then((decisionTaskID) => {
+        this.ThResultSetModel.triggerNewJobs(builderNames, decisionTaskID).then((result) => {
           this.thNotify.send(result, "success");
           this.ThResultSetStore.deleteRunnableJobs(repoName, pushId);
-        }, function (e) {
+        }, (e) => {
           this.thNotify.send(this.ThTaskclusterErrors.format(e), 'danger', { sticky: true });
         });
       });
@@ -193,7 +204,7 @@ export default class PushHeader extends React.PureComponent {
                 data-ignore-job-clear-on-click
               />
             </button>
-            {this.showTriggerButton() &&
+            {this.state.runnableJobsSelected && runnableVisible &&
               <button
                 className="btn btn-sm btn-push trigger-new-jobs-btn"
                 title="Trigger new jobs"
