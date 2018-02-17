@@ -5,6 +5,7 @@ import { platformMap } from '../js/constants';
 import * as aggregateIds from './aggregateIds';
 import Platform from './Platform';
 import { findInstance, findSelectedInstance, findJobInstance } from '../helpers/jobHelper';
+import { getUrlParam } from '../helpers/locationHelper';
 
 export default class PushJobs extends React.Component {
   constructor(props) {
@@ -61,7 +62,13 @@ export default class PushJobs extends React.Component {
     );
 
     this.jobsClassifiedUnlisten = this.$rootScope.$on(
-      this.thEvents.jobsClassified, () => {
+      this.thEvents.jobsClassified, (ev, { jobs }) => {
+        // must set state on all these jobs
+        // Need to extract the jobs from that object, seems keyed off the push id, maybe?
+        // not causing a re-render here
+        Object.values(jobs).forEach((job) => {
+          findJobInstance(job.id).setState({ failureClassificationId: job.failure_classification_id });
+        });
         this.filterJobs();
       }
     );
@@ -196,11 +203,13 @@ export default class PushJobs extends React.Component {
   }
 
   filterPlatform(platform) {
+    const selectedJobId = parseInt(getUrlParam("selectedJob"));
+
     platform.visible = false;
     platform.groups.forEach((group) => {
       group.visible = false;
       group.jobs.forEach((job) => {
-        job.visible = this.thJobFilters.showJob(job);
+        job.visible = this.thJobFilters.showJob(job) || job.id === selectedJobId;
         if (job.state === 'runnable') {
           job.visible = job.visible && this.props.push.isRunnableVisible;
         }

@@ -99,6 +99,7 @@ treeherder.factory('thPinboard', [
                 // won't be invoked and the UI won't update right away.  Use
                 // $timeout to kick it off.
                 $timeout(() => {
+                    console.log("addBug", bug, job);
                     relatedBugs[bug.id] = bug;
                     api.count.numRelatedBugs = _.size(relatedBugs);
 

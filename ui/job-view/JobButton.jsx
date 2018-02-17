@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getBtnClass, findJobInstance } from "../helpers/jobHelper";
+import { getUrlParam } from "../helpers/locationHelper";
 
 export default class JobButtonComponent extends React.Component {
   constructor(props) {
@@ -9,6 +10,7 @@ export default class JobButtonComponent extends React.Component {
 
     this.$rootScope = $injector.get('$rootScope');
     this.thEvents = $injector.get('thEvents');
+    this.thJobFilters = $injector.get('thJobFilters');
     this.ThResultSetStore = $injector.get('ThResultSetStore');
 
     this.state = {
@@ -20,8 +22,7 @@ export default class JobButtonComponent extends React.Component {
   componentWillMount() {
     const { job } = this.props;
     const { id } = job;
-    const urlSelectedJob = new URLSearchParams(
-      location.hash.split('?')[1]).get('selectedJob');
+    const urlSelectedJob = getUrlParam('selectedJob');
 
     if (parseInt(urlSelectedJob) === id) {
       this.setState({ isSelected: true });
@@ -56,6 +57,14 @@ export default class JobButtonComponent extends React.Component {
   }
 
   setSelected(isSelected) {
+    const { job } = this.props;
+    // if a job was just classified, and we are in unclassified only mode,
+    // then the job no longer meets the filter criteria.  However, if it
+    // is still selected, then it should stay visible so that next/previous
+    // navigation still works.  Then, as soon as the selection changes, it
+    // it will disappear.  So visible must be contingent on the filters AND
+    // whether it is still selected.
+    job.visible = this.thJobFilters.showJob(job) || isSelected;
     this.setState({ isSelected });
   }
 
