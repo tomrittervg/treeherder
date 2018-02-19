@@ -98,6 +98,7 @@ export default class PushHeader extends React.PureComponent {
         this.ThResultSetModel.triggerNewJobs(builderNames, decisionTaskID).then((result) => {
           this.thNotify.send(result, "success");
           this.ThResultSetStore.deleteRunnableJobs(repoName, pushId);
+          this.props.hideRunnableJobsCb();
         }, (e) => {
           this.thNotify.send(this.ThTaskclusterErrors.format(e), 'danger', { sticky: true });
         });
