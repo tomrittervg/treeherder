@@ -34,6 +34,7 @@ export default class JobButtonComponent extends React.Component {
       findJobInstance(this.props.job.id, true);
     }
   }
+
   /**
    * Rather than making this a PureComponent, which does shallow compares of
    * props and state, we are using shouldComponentUpdate, because the
@@ -53,6 +54,10 @@ export default class JobButtonComponent extends React.Component {
       isSelected !== nextState.isSelected ||
       isRunnableSelected !== nextState.isRunnableSelected
     );
+  }
+
+  componentWillUnmount() {
+    this.setState({ isRunnableSelected: false, isSelected: false });
   }
 
   setSelected(isSelected) {

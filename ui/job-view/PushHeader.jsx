@@ -96,9 +96,11 @@ export default class PushHeader extends React.PureComponent {
       const builderNames = this.ThResultSetStore.getSelectedRunnableJobs(repoName, pushId);
       this.ThResultSetStore.getGeckoDecisionTaskId(repoName, pushId).then((decisionTaskID) => {
         this.ThResultSetModel.triggerNewJobs(builderNames, decisionTaskID).then((result) => {
+          console.log("triggerNewJobs result", result);
           this.thNotify.send(result, "success");
           this.ThResultSetStore.deleteRunnableJobs(repoName, pushId);
           this.props.hideRunnableJobsCb();
+          this.setState({ runnableJobsSelected: false });
         }, (e) => {
           this.thNotify.send(this.ThTaskclusterErrors.format(e), 'danger', { sticky: true });
         });
